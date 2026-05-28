@@ -819,7 +819,6 @@
 
             const url = paymentUrls[selectedPlan.price];
             if (url) {
-                tg.close();
                 window.open(url, '_blank');
 
                 // After 5 seconds show error
@@ -832,7 +831,9 @@
                     }
                 }, 5000);
             }
-        });function createSparkles(element) {
+        });
+
+        function createSparkles(element) {
             const rect = element.getBoundingClientRect();
             const colors = ['#af52de', '#007aff', '#ff9500', '#34c759'];
             for (let i = 0; i < 8; i++) {
