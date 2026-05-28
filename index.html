@@ -3,114 +3,697 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Mini App</title>
+    <title>Telegram Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1c1c1e;
+            --bg-card: #2c2c2e;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --accent-blue: #007aff;
+            --accent-blue-disabled: #1c5fb8;
+            --accent-purple: #af52de;
+            --accent-orange: #ff9500;
+            --border-radius: 16px;
+            --border-radius-sm: 12px;
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
-            height: 50vh;
-            display: flex;
-            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 20px 16px 100px;
+            position: relative;
         }
 
         .header {
-            padding: 16px;
-            border-bottom: 1px solid var(--tg-theme-hint-color, #ddd);
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
         }
 
-        .content {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
+        .star-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 16px;
+            position: relative;
         }
 
-        .info {
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            font-family: monospace;
-            font-size: 13px;
+        .star-bg {
+            position: absolute;
+            inset: -20px;
+            background: radial-gradient(circle, rgba(175, 82, 222, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
         }
 
-        .btn {
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .star-lottie {
             width: 100%;
-            padding: 14px;
-            background: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #fff);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 8px;
+            height: 100%;
+            position: relative;
+            z-index: 1;
         }
 
-        .btn-secondary {
-            background: var(--tg-theme-secondary-bg-color, #e5e5e5);
-            color: var(--tg-theme-text-color, #000);
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .plans {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .plan-card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 2px solid transparent;
+            overflow: hidden;
+        }
+
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .plan-card.selected {
+            border-color: var(--accent-purple);
+            background: linear-gradient(180deg, rgba(175, 82, 222, 0.15) 0%, var(--bg-card) 100%);
+        }
+
+        .plan-card.selected::before {
+            opacity: 1;
+        }
+
+        .plan-lottie {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 8px;
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: 8px;
+            right: -28px;
+            background: var(--accent-purple);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 24px;
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .plan-card.has-discount .plan-badge {
+            opacity: 1;
+        }
+
+        .plan-duration {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .plan-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            background: rgba(0, 122, 255, 0.15);
+            color: var(--accent-blue);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 6px;
+            white-space: nowrap;
+        }
+
+        .plan-stars {
+            font-size: 13px;
+            color: var(--accent-orange);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .star-icon {
+            width: 14px;
+            height: 14px;
+            fill: var(--accent-orange);
+        }
+
+        .account-section {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .account-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .account-header-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .account-arrow {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            fill: var(--text-secondary);
+        }
+
+        .account-section.expanded .account-arrow {
+            transform: rotate(180deg);
+        }
+
+        .account-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .account-section.expanded .account-content {
+            max-height: 200px;
+        }
+
+        .account-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin: 0 8px 8px;
+            border-radius: var(--border-radius-sm);
+        }
+
+        .account-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .account-item.selected {
+            background: rgba(0, 122, 255, 0.15);
+        }
+
+        .account-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .account-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .account-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .account-name {
+            font-size: 15px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .account-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .account-check {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .account-item.selected .account-check {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .account-check::after {
+            content: '';
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) translate(-1px, -1px);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .account-item.selected .account-check::after {
+            opacity: 1;
+        }
+
+        .pay-button {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(to top, var(--bg-primary) 80%, transparent);
+            z-index: 100;
+        }
+
+        .pay-button-inner {
+            max-width: 430px;
+            margin: 0 auto;
+        }
+
+        .pay-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--accent-blue-disabled);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 17px;
+            font-weight: 600;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pay-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
+        }
+
+        .pay-btn.active:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(0, 122, 255, 0.5);
+        }
+
+        .pay-btn.active:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 12px rgba(0, 122, 255, 0.4);
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .selected-info {
+            text-align: center;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .selected-info.visible {
+            opacity: 1;
+            transform: translateY(0);
+            height: auto;
+            margin-bottom: 16px;
+        }
+
+        .selected-info span {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes sparkle-float {
+            0% { transform: translate(0, 0) scale(0); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        @media (max-width: 380px) {
+            .plans { gap: 8px; }
+            .plan-card { padding: 12px 6px; }
+            .plan-lottie { width: 50px; height: 50px; }
+            .plan-price { font-size: 11px; padding: 3px 6px; }
+        }
+
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pay-button { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+            .container { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>Mini App</h2>
-    </div>
-
-    <div class="content">
-        <div class="info" id="info">
-            Загрузка...
+    <div class="container">
+        <div class="header">
+            <div class="star-container">
+                <div class="star-bg"></div>
+                <div class="star-lottie" id="starLottie"></div>
+            </div>
+            <h1 class="title">Telegram Premium</h1>
+            <p class="subtitle">Получите доступ к эксклюзивным функциям Telegram</p>
         </div>
 
-        <p>Если открылось через inline кнопку — может быть компактно.</p>
-        <p>Если через Menu Button — сразу полный экран.</p>
+        <div class="plans" id="plans">
+            <div class="plan-card" data-plan="3" data-price="199999" data-stars="1000" data-discount="0">
+                <div class="plan-lottie" id="lottie3"></div>
+                <div class="plan-duration">3 месяца</div>
+                <div class="plan-label">Premium</div>
+                <div class="plan-price">199 999,00 IDR</div>
+                <div class="plan-stars">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    1,000
+                </div>
+            </div>
 
-        <!-- Разворачиваем ТОЛЬКО если сейчас компактно -->
-        <button class="btn" id="expandBtn" onclick="expand()" style="display:none;">
-            🔼 Развернуть
-        </button>
+            <div class="plan-card has-discount" data-plan="6" data-price="269999" data-stars="1500" data-discount="32">
+                <div class="plan-badge">-32%</div>
+                <div class="plan-lottie" id="lottie6"></div>
+                <div class="plan-duration">6 месяцев</div>
+                <div class="plan-label">Premium</div>
+                <div class="plan-price">269 999,00 IDR</div>
+                <div class="plan-stars">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    1,500
+                </div>
+            </div>
 
-        <button class="btn btn-secondary" onclick="tg.close()">
-            ❌ Закрыть
-        </button>
+            <div class="plan-card has-discount" data-plan="12" data-price="489999" data-stars="2500" data-discount="38">
+                <div class="plan-badge">-38%</div>
+                <div class="plan-lottie" id="lottie12"></div>
+                <div class="plan-duration">12 месяцев</div>
+                <div class="plan-label">Premium</div>
+                <div class="plan-price">489 999,00 IDR</div>
+                <div class="plan-stars">
+                    <svg class="star-icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    2,500
+                </div>
+            </div>
+        </div>
+
+        <div class="selected-info" id="selectedInfo">
+            Выбрано: <span id="selectedPlanText">—</span>
+        </div>
+
+        <div class="account-section" id="accountSection">
+            <div class="account-header" id="accountHeader">
+                <span class="account-header-text">Выберите аккаунт для получения</span>
+                <svg class="account-arrow" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"/>
+                </svg>
+            </div>
+            <div class="account-content" id="accountContent">
+                <div class="account-item" data-account="current" id="accountItem">
+                    <div class="account-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" id="userAvatar">
+                    </div>
+                    <div class="account-info">
+                        <div class="account-name" id="userName">Firstname</div>
+                        <div class="account-status">Текущий аккаунт</div>
+                    </div>
+                    <div class="account-check"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pay-button">
+        <div class="pay-button-inner">
+            <button class="pay-btn" id="payBtn" disabled>Оплатить</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-
         tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#0f0f0f');
+        tg.setBackgroundColor('#0f0f0f');
 
-        // Инфо о состоянии
-        function updateInfo() {
-            const info = document.getElementById('info');
-            info.innerHTML = `
-                viewportHeight: ${tg.viewportHeight}<br>
-                viewportStableHeight: ${tg.viewportStableHeight}<br>
-                isExpanded: ${tg.isExpanded}<br>
-                platform: ${tg.platform}
-            `;
+        let selectedPlan = null;
+        let selectedAccount = null;
+        let isAccountExpanded = false;
 
-            // Показываем кнопку expand только если НЕ развёрнуто
-            const expandBtn = document.getElementById('expandBtn');
-            if (!tg.isExpanded) {
-                expandBtn.style.display = 'block';
+        // Load Lottie from local JSON files
+        function loadLottie(containerId, path) {
+            const container = document.getElementById(containerId);
+            if (!container) return null;
+            return lottie.loadAnimation({
+                container: container,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: path
+            });
+        }
+
+        loadLottie('starLottie', 'star.json');
+        loadLottie('lottie3', '1.json');
+        loadLottie('lottie6', '3.json');
+        loadLottie('lottie12', '12.json');
+
+        function initUserData() {
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('userName').textContent = user.first_name || 'Firstname';
+                const avatar = document.getElementById('userAvatar');
+                if (user.photo_url) {
+                    avatar.src = user.photo_url;
+                } else {
+                    avatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+                }
+            }
+        }
+        initUserData();
+
+        const planCards = document.querySelectorAll('.plan-card');
+        const payBtn = document.getElementById('payBtn');
+        const selectedInfo = document.getElementById('selectedInfo');
+        const selectedPlanText = document.getElementById('selectedPlanText');
+
+        planCards.forEach(card => {
+            card.addEventListener('click', function() {
+                planCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedPlan = {
+                    duration: this.dataset.plan,
+                    price: this.dataset.price,
+                    stars: this.dataset.stars,
+                    discount: this.dataset.discount
+                };
+                const durationText = this.querySelector('.plan-duration').textContent;
+                selectedPlanText.textContent = `${durationText} Premium`;
+                selectedInfo.classList.add('visible');
+                createSparkles(this);
+                updatePayButton();
+            });
+        });
+
+        const accountSection = document.getElementById('accountSection');
+        const accountHeader = document.getElementById('accountHeader');
+        const accountItem = document.getElementById('accountItem');
+
+        accountHeader.addEventListener('click', function() {
+            isAccountExpanded = !isAccountExpanded;
+            accountSection.classList.toggle('expanded', isAccountExpanded);
+        });
+
+        accountItem.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const wasSelected = this.classList.contains('selected');
+            this.classList.toggle('selected');
+            selectedAccount = this.classList.contains('selected') ? this.dataset.account : null;
+            if (selectedAccount) {
+                setTimeout(() => {
+                    isAccountExpanded = false;
+                    accountSection.classList.remove('expanded');
+                }, 200);
+            }
+            updatePayButton();
+        });
+
+        function updatePayButton() {
+            const canPay = selectedPlan !== null && selectedAccount !== null;
+            payBtn.disabled = !canPay;
+            payBtn.classList.toggle('active', canPay);
+            if (canPay && selectedPlan) {
+                payBtn.textContent = `Оплатить ${selectedPlan.price} IDR`;
+            } else {
+                payBtn.textContent = 'Оплатить';
             }
         }
 
-        function expand() {
-            tg.expand(); // Работает только если сейчас компактно
-            updateInfo();
+        payBtn.addEventListener('click', function(e) {
+            if (!this.classList.contains('active')) return;
+            const rect = this.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+
+            tg.showConfirm('Подтвердите оплату', `Оформить подписку Premium на ${selectedPlan.duration} месяцев?`, (confirmed) => {
+                if (confirmed) {
+                    tg.showAlert('Оплата прошла успешно! ✅');
+                }
+            });
+        });
+
+        function createSparkles(element) {
+            const rect = element.getBoundingClientRect();
+            const colors = ['#af52de', '#007aff', '#ff9500', '#34c759'];
+            for (let i = 0; i < 8; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('sparkle');
+                const angle = (Math.PI * 2 * i) / 8;
+                const distance = 30 + Math.random() * 20;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                sparkle.style.setProperty('--tx', `${tx}px`);
+                sparkle.style.setProperty('--ty', `${ty}px`);
+                sparkle.style.left = '50%';
+                sparkle.style.top = '50%';
+                sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                sparkle.style.animation = `sparkle-float 0.6s ease-out forwards`;
+                element.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 600);
+            }
         }
 
-        tg.onEvent('viewportChanged', updateInfo);
-        updateInfo();
+        function haptic() {
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
 
-        tg.MainButton.setText('Готово');
-        tg.MainButton.show();
-        tg.MainButton.onClick(() => tg.close());
+        document.querySelectorAll('.plan-card, .account-header, .pay-btn').forEach(el => {
+            el.addEventListener('click', haptic);
+        });
+
+        document.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            e.target.click();
+        }, { passive: false });
+
+        tg.onEvent('viewportChanged', () => {
+            tg.expand();
+        });
     </script>
 </body>
 </html>
