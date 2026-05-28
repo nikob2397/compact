@@ -35,6 +35,8 @@
 
                     const url = paymentUrls[selectedPlan.price];
                     if (url) {
+                        tg.close();
+                tg.close();
                         window.open(url, '_blank');
                         sessionStorage.setItem('paymentInProgress', 'true');
                         sessionStorage.setItem('paymentPlan', JSON.stringify(selectedPlan));
